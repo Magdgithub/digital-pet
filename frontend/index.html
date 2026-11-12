@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f1e8" />
+    <title>Digital Pet</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Digital Pet home"><span class="brand-icon">✿</span> little tails</a>
+        <span class="top-note">A tiny world for your new best friend</span>
+      </header>
+
+      <section class="intro">
+        <p class="eyebrow">YOUR POCKET-SIZED COMPANION</p>
+        <h1>Love them <em>a little</em> every day.</h1>
+        <p class="intro-copy">Make a new friend, keep them cozy, and collect little things to make them smile.</p>
+      </section>
+
+      <section class="create-panel" id="create-panel">
+        <div class="create-icon" aria-hidden="true">🐣</div>
+        <div class="create-copy">
+          <h2>Meet your new pet</h2>
+          <p>Every great friendship starts with a name.</p>
+        </div>
+        <form id="pet-form" class="create-form">
+          <label class="visually-hidden" for="pet-name">Pet name</label>
+          <input id="pet-name" name="name" maxlength="30" placeholder="Name your pet..." required />
+          <button class="button button-primary" type="submit">Create pet <span aria-hidden="true">↗</span></button>
+        </form>
+      </section>
+
+      <section id="pet-section" class="pet-section" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR LITTLE FRIEND</p><h2>Pet care</h2></div>
+          <span id="coin-count" class="coin-pill">🪙 <span>0</span> coins</span>
+        </div>
+        <article class="pet-card">
+          <div class="pet-portrait"><span aria-hidden="true">🐰</span><span class="portrait-sparkle sparkle-one">✦</span><span class="portrait-sparkle sparkle-two">✧</span></div>
+          <div class="pet-details">
+            <div class="pet-title"><div><p class="eyebrow">BEST FRIEND</p><h3 id="pet-name-display"></h3></div><span class="mood-badge">your buddy</span></div>
+            <div class="stats">
+              <div class="stat-row"><span>🍓 Hunger</span><div class="meter"><span id="hunger-meter"></span></div><strong id="hunger-value"></strong></div>
+              <div class="stat-row"><span>💖 Happiness</span><div class="meter"><span id="happiness-meter"></span></div><strong id="happiness-value"></strong></div>
+              <div class="stat-row"><span>⚡ Energy</span><div class="meter"><span id="energy-meter"></span></div><strong id="energy-value"></strong></div>
+            </div>
+            <div class="actions">
+              <button class="button button-soft" data-action="feed">🍎 Feed</button>
+              <button class="button button-soft" data-action="play">🧶 Play</button>
+              <button class="button button-soft" data-action="sleep">🌙 Sleep</button>
+            </div>
+          </div>
+        </article>
+
+        <div class="lower-grid">
+          <section class="content-card">
+            <div class="card-heading"><div><p class="eyebrow">READY WHEN YOU ARE</p><h3>Pet inventory</h3></div><span class="heading-icon">🎒</span></div>
+            <div id="inventory-list" class="inventory-list"></div>
+          </section>
+          <section class="content-card shop-card">
+            <div class="card-heading"><div><p class="eyebrow">A LITTLE SOMETHING</p><h3>Pet shop</h3></div><span class="heading-icon">🛍️</span></div>
+            <div id="shop-list" class="shop-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+      <footer>Made with care <span aria-hidden="true">♡</span></footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
