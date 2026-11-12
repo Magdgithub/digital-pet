@@ -5,10 +5,10 @@ A cozy little digital pet starter project with a C# / ASP.NET Core REST API and 
 ## Features
 
 - Adopt and name a cat, dog, bunny, bear, fox, penguin, frog, panda, turtle, or unicorn
-- Feed your pet an apple with a munching animation, play with a toy while it runs around, or let it nap for five seconds
-- Dress up pets with a tiara, bow, or scarf
+- Feed your pet an animated apple, play as it runs after a yarn ball, or let it sleep for five seconds
+- Dress pets with vector-drawn tiaras, bows, and scarves
 - Switch between pets, track their needs, and use or buy supplies
-- Responsive, playful interface
+- Animated vector artwork and a responsive, playful interface (no emoji animal art)
 - In-memory backend storage for local development (data resets when the backend restarts)
 
 ## Requirements
