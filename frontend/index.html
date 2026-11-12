@@ -3,18 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f6f1e8" />
+    <meta name="theme-color" content="#79e2d9" />
     <meta name="description" content="Make a new friend and care for your own little digital pet." />
     <title>Little Tails — Digital Pet</title>
+    <link rel="stylesheet" href="/src/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="app-shell">
       <header class="topbar">
         <a class="brand" href="#" aria-label="Little Tails home"><span class="brand-icon">✿</span> little tails</a>
-        <span class="top-note">A tiny world for your new best friend</span>
+        <span class="top-note">A tiny world for your new best friend <span aria-hidden="true">♡</span></span>
       </header>
 
       <section class="intro">
@@ -24,7 +25,7 @@
       </section>
 
       <section class="create-panel" aria-labelledby="create-title">
-        <div class="create-icon" aria-hidden="true">🐣</div>
+        <div class="create-icon" aria-hidden="true">🥚</div>
         <div class="create-copy">
           <h2 id="create-title">Meet a new friend</h2>
           <p>Every lovely friendship starts with a name.</p>
@@ -37,7 +38,8 @@
       </section>
 
       <section id="welcome-panel" class="welcome-panel">
-        <span class="welcome-star" aria-hidden="true">✦</span>
+        <span class="welcome-star star-one" aria-hidden="true">✦</span>
+        <span class="welcome-star star-two" aria-hidden="true">♡</span>
         <p class="eyebrow">YOUR STORY STARTS HERE</p>
         <h2>A little friend is waiting.</h2>
         <p>Give your pet a name above and your cozy adventure can begin.</p>
@@ -51,23 +53,26 @@
         <nav id="pet-switcher" class="pet-switcher" aria-label="Choose a pet" hidden></nav>
 
         <article class="pet-card">
-          <div id="pet-portrait" class="pet-portrait" aria-label="Animated bunny pet">
-            <span class="portrait-sparkle sparkle-one" aria-hidden="true">✦</span>
-            <span class="portrait-sparkle sparkle-two" aria-hidden="true">✧</span>
-            <span class="portrait-heart" aria-hidden="true">♡</span>
-            <div class="bunny" aria-hidden="true">
-              <span class="bunny-ear ear-left"><i></i></span>
-              <span class="bunny-ear ear-right"><i></i></span>
-              <span class="bunny-body">
-                <span class="bunny-face">
-                  <i class="eye eye-left"></i><i class="eye eye-right"></i>
-                  <i class="blush blush-left"></i><i class="blush blush-right"></i>
-                  <i class="nose"></i><i class="mouth"></i>
-                </span>
-              </span>
-              <span class="bunny-tail"></span>
+          <div id="pet-portrait" class="pet-portrait" aria-label="Animated orange cat hugging a speckled egg">
+            <span class="portrait-cloud cloud-one" aria-hidden="true"></span>
+            <span class="portrait-cloud cloud-two" aria-hidden="true"></span>
+            <span class="portrait-sparkle sparkle-one" aria-hidden="true">♡</span>
+            <span class="portrait-sparkle sparkle-two" aria-hidden="true">♥</span>
+            <div class="kitty" aria-hidden="true">
+              <span class="cat-ear ear-left"><i></i></span>
+              <span class="cat-ear ear-right"><i></i></span>
+              <div class="cat-head">
+                <span class="cat-mark mark-one"></span><span class="cat-mark mark-two"></span>
+                <span class="cat-eye eye-left"><i></i></span><span class="cat-eye eye-right"><i></i></span>
+                <span class="cat-mouth"><i></i></span>
+                <span class="cat-whisker whisker-left"></span><span class="cat-whisker whisker-right"></span>
+              </div>
+              <span class="cat-body"></span>
+              <span class="cat-paw paw-left"></span><span class="cat-paw paw-right"></span>
             </div>
+            <div class="speckled-egg" aria-hidden="true"><span class="egg-face"><i></i><b></b></span></div>
             <span class="portrait-shadow"></span>
+            <span class="grass grass-left"></span><span class="grass grass-right"></span>
           </div>
 
           <div class="pet-details">

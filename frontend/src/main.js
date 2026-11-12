@@ -58,7 +58,7 @@ function renderPetSwitcher() {
   switcher.hidden = pets.length < 2;
   switcher.innerHTML = pets.map(candidate => `
     <button class="pet-tab ${candidate.id === pet.id ? 'active' : ''}" type="button" data-pet-id="${candidate.id}" aria-pressed="${candidate.id === pet.id}">
-      <span aria-hidden="true">🐰</span> ${escapeHtml(candidate.name)}
+      <span aria-hidden="true">🐱</span> ${escapeHtml(candidate.name)}
     </button>`).join('');
 }
 
