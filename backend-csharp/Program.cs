@@ -5,7 +5,7 @@ builder.Services.AddSingleton<PetStore>();
 var app = builder.Build();
 
 app.MapGet("/api/pets", (PetStore store) => Results.Ok(store.GetAll()));
-app.MapPost("/api/pets", (CreatePetRequest request, PetStore store) => Run(() => store.Create(request.Name)));
+app.MapPost("/api/pets", (CreatePetRequest request, PetStore store) => Run(() => store.Create(request.Name, request.Species)));
 app.MapGet("/api/pets/{id:long}", (long id, PetStore store) => Run(() => store.Get(id)));
 app.MapPost("/api/pets/{id:long}/actions/feed", (long id, PetStore store) => Run(() => store.Feed(id)));
 app.MapPost("/api/pets/{id:long}/actions/play", (long id, PetStore store) => Run(() => store.Play(id)));
@@ -13,28 +13,26 @@ app.MapPost("/api/pets/{id:long}/actions/sleep", (long id, PetStore store) => Ru
 app.MapGet("/api/items", (PetStore store) => Results.Ok(store.GetCatalog()));
 app.MapPost("/api/pets/{id:long}/inventory/{itemId}/use", (long id, string itemId, PetStore store) => Run(() => store.UseItem(id, itemId)));
 app.MapPost("/api/pets/{id:long}/inventory/{itemId}/purchase", (long id, string itemId, PetStore store) => Run(() => store.PurchaseItem(id, itemId)));
+app.MapPut("/api/pets/{id:long}/accessory", (long id, AccessoryRequest request, PetStore store) => Run(() => store.SetAccessory(id, request.AccessoryId)));
 
 app.Run();
 
 static IResult Run(Func<object> action)
 {
-    try
-    {
-        return Results.Ok(action());
-    }
-    catch (PetException exception)
-    {
-        return Results.Problem(statusCode: exception.StatusCode, title: exception.Message);
-    }
+    try { return Results.Ok(action()); }
+    catch (PetException exception) { return Results.Problem(statusCode: exception.StatusCode, title: exception.Message); }
 }
 
-public sealed record CreatePetRequest(string? Name);
+public sealed record CreatePetRequest(string? Name, string? Species);
+public sealed record AccessoryRequest(string? AccessoryId);
 public sealed record ItemInfo(string Id, string Name, int Price, string Description);
 
 public sealed class Pet
 {
     public long Id { get; init; }
     public string Name { get; init; } = "";
+    public string Species { get; init; } = "cat";
+    public string Accessory { get; set; } = "none";
     public int Hunger { get; set; } = 50;
     public int Happiness { get; set; } = 70;
     public int Energy { get; set; } = 80;
@@ -53,6 +51,10 @@ public sealed class PetException(int statusCode, string message) : Exception(mes
 
 public sealed class PetStore
 {
+    private static readonly HashSet<string> Species = new(StringComparer.OrdinalIgnoreCase)
+        { "cat", "dog", "bunny", "bear", "fox", "penguin", "frog", "panda", "turtle", "unicorn" };
+    private static readonly HashSet<string> Accessories = new(StringComparer.OrdinalIgnoreCase)
+        { "none", "tiara", "headband", "bow", "crown", "flower" };
     private readonly ConcurrentDictionary<long, Pet> pets = new();
     private long nextId;
     private readonly Dictionary<string, ItemInfo> catalog = new()
@@ -63,21 +65,21 @@ public sealed class PetStore
     };
 
     public List<Pet> GetAll() => pets.Values.OrderBy(pet => pet.Id).ToList();
+    public Pet Get(long id) => pets.TryGetValue(id, out var pet) ? pet : throw new PetException(404, "Pet not found");
 
-    public Pet Get(long id) => pets.TryGetValue(id, out var pet)
-        ? pet
-        : throw new PetException(404, "Pet not found");
-
-    public Pet Create(string? rawName)
+    public Pet Create(string? rawName, string? rawSpecies)
     {
         var name = rawName?.Trim() ?? "";
+        var species = rawSpecies?.Trim().ToLowerInvariant() ?? "cat";
         if (string.IsNullOrWhiteSpace(name) || name.Length > 30)
             throw new PetException(400, "Pet name must be between 1 and 30 characters");
+        if (!Species.Contains(species)) throw new PetException(400, "Choose a valid pet species");
 
         var pet = new Pet
         {
             Id = Interlocked.Increment(ref nextId),
             Name = name,
+            Species = species,
             Inventory = new Dictionary<string, int> { ["food"] = 2, ["toy"] = 1, ["treat"] = 1 }
         };
         pets[pet.Id] = pet;
@@ -97,9 +99,7 @@ public sealed class PetStore
         lock (pet)
         {
             if (pet.Energy < 10) throw new PetException(409, "Your pet is too tired to play. Let it sleep first.");
-            pet.ChangeHappiness(15);
-            pet.ChangeEnergy(-10);
-            pet.ChangeHunger(5);
+            pet.ChangeHappiness(15); pet.ChangeEnergy(-10); pet.ChangeHunger(5);
         }
         return pet;
     }
@@ -108,6 +108,15 @@ public sealed class PetStore
     {
         var pet = Get(id);
         lock (pet) { pet.ChangeEnergy(30); pet.ChangeHunger(10); }
+        return pet;
+    }
+
+    public Pet SetAccessory(long id, string? rawAccessory)
+    {
+        var accessory = rawAccessory?.Trim().ToLowerInvariant() ?? "none";
+        if (!Accessories.Contains(accessory)) throw new PetException(400, "Choose a valid accessory");
+        var pet = Get(id);
+        lock (pet) pet.Accessory = accessory;
         return pet;
     }
 
@@ -122,10 +131,7 @@ public sealed class PetStore
             var count = pet.Inventory.GetValueOrDefault(item.Id);
             if (count < 1) throw new PetException(409, "That item is not in your inventory");
             if (itemId == "toy" && pet.Energy < 10) throw new PetException(409, "Your pet is too tired to play with the toy");
-
-            if (count == 1) pet.Inventory.Remove(itemId);
-            else pet.Inventory[itemId] = count - 1;
-
+            if (count == 1) pet.Inventory.Remove(itemId); else pet.Inventory[itemId] = count - 1;
             switch (itemId)
             {
                 case "food": pet.ChangeHunger(-25); break;
@@ -149,7 +155,5 @@ public sealed class PetStore
         return pet;
     }
 
-    private ItemInfo GetItem(string itemId) => catalog.TryGetValue(itemId, out var item)
-        ? item
-        : throw new PetException(404, "Item not found");
+    private ItemInfo GetItem(string itemId) => catalog.TryGetValue(itemId, out var item) ? item : throw new PetException(404, "Item not found");
 }

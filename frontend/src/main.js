@@ -1,23 +1,26 @@
 const API = '/api';
 const itemEmojis = { food: '🍎', treat: '🍪', toy: '🧶' };
 const itemNames = { food: 'Pet food', treat: 'Treat', toy: 'Toy' };
-
+const animals = { cat: '🐱', dog: '🐶', bunny: '🐰', bear: '🐻', fox: '🦊', penguin: '🐧', frog: '🐸', panda: '🐼', turtle: '🐢', unicorn: '🦄' };
+const accessories = [
+  { id: 'none', name: 'No outfit', icon: '✨' },
+  { id: 'tiara', name: 'Tiara', icon: '👑' },
+  { id: 'headband', name: 'Headband', icon: '🎀' },
+  { id: 'bow', name: 'Bow', icon: '🎗️' },
+  { id: 'crown', name: 'Crown', icon: '♛' },
+  { id: 'flower', name: 'Flower', icon: '🌼' },
+];
 let pets = [];
 let pet = null;
 let shopItems = [];
 let busy = false;
+let effectTimer;
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-  });
+  const response = await fetch(`${API}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...options.headers } });
   if (!response.ok) {
     let message = `Request failed (${response.status}). Please try again.`;
-    try {
-      const body = await response.json();
-      message = body.detail || body.title || body.message || message;
-    } catch { /* keep the fallback message */ }
+    try { const body = await response.json(); message = body.detail || body.title || body.message || message; } catch { /* use fallback */ }
     throw new Error(message);
   }
   return response.status === 204 ? null : response.json();
@@ -32,9 +35,7 @@ function showMessage(message, isError = false) {
 }
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, character => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  })[character]);
+  return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 }
 
 function setMeter(id, value) {
@@ -56,164 +57,123 @@ function moodForPet() {
 function renderPetSwitcher() {
   const switcher = document.querySelector('#pet-switcher');
   switcher.hidden = pets.length < 2;
-  switcher.innerHTML = pets.map(candidate => `
-    <button class="pet-tab ${candidate.id === pet.id ? 'active' : ''}" type="button" data-pet-id="${candidate.id}" aria-pressed="${candidate.id === pet.id}">
-      <span aria-hidden="true">🐱</span> ${escapeHtml(candidate.name)}
-    </button>`).join('');
+  switcher.innerHTML = pets.map(candidate => `<button class="pet-tab ${candidate.id === pet.id ? 'active' : ''}" type="button" data-pet-id="${candidate.id}" aria-pressed="${candidate.id === pet.id}"><span aria-hidden="true">${animals[candidate.species] || '🐾'}</span> ${escapeHtml(candidate.name)}</button>`).join('');
+}
+
+function renderWardrobe() {
+  const list = document.querySelector('#wardrobe-list');
+  list.innerHTML = accessories.map(item => `<button type="button" class="wardrobe-item ${pet.accessory === item.id ? 'selected' : ''}" data-accessory="${item.id}" aria-pressed="${pet.accessory === item.id}" title="${item.name}"><span aria-hidden="true">${item.icon}</span><small>${item.name}</small></button>`).join('');
+  const selected = accessories.find(item => item.id === pet.accessory);
+  document.querySelector('#pet-accessory').textContent = pet.accessory === 'none' ? '' : selected?.icon || '';
 }
 
 function renderInventory() {
   const list = document.querySelector('#inventory-list');
   const inventory = Object.entries(pet.inventory || {}).filter(([, count]) => count > 0);
-  if (inventory.length === 0) {
-    list.innerHTML = '<p class="empty-state">Your bag is empty. Pick up a little something at the shop!</p>';
-    return;
-  }
-  list.innerHTML = inventory.map(([id, count]) => `
-    <div class="item-row">
-      <span class="item-emoji" aria-hidden="true">${itemEmojis[id] || '🎁'}</span>
-      <span class="item-name">${escapeHtml(itemNames[id] || id)}</span>
-      <span class="item-count">×${Number(count)}</span>
-      <button class="small-button" type="button" data-use="${escapeHtml(id)}" aria-label="Use ${escapeHtml(itemNames[id] || id)}">Use</button>
-    </div>`).join('');
+  if (!inventory.length) { list.innerHTML = '<p class="empty-state">Your bag is empty. Pick up a little something at the shop!</p>'; return; }
+  list.innerHTML = inventory.map(([id, count]) => `<div class="item-row"><span class="item-emoji" aria-hidden="true">${itemEmojis[id] || '🎁'}</span><span class="item-name">${escapeHtml(itemNames[id] || id)}</span><span class="item-count">×${Number(count)}</span><button class="small-button" type="button" data-use="${escapeHtml(id)}" aria-label="Use ${escapeHtml(itemNames[id] || id)}">Use</button></div>`).join('');
 }
 
 function renderShop() {
   const list = document.querySelector('#shop-list');
-  if (!pet) {
-    list.innerHTML = '<p class="empty-state">Create a pet to visit the shop.</p>';
-    return;
-  }
-  list.innerHTML = shopItems.map(item => `
-    <div class="item-row shop-row">
-      <span class="item-emoji" aria-hidden="true">${itemEmojis[item.id] || '🎁'}</span>
-      <span class="item-description"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description)}</small></span>
-      <button class="small-button buy-button" type="button" data-buy="${escapeHtml(item.id)}" ${pet.coins < item.price ? 'disabled' : ''}>🪙 ${Number(item.price)}</button>
-    </div>`).join('');
+  if (!pet) { list.innerHTML = '<p class="empty-state">Create a pet to visit the shop.</p>'; return; }
+  list.innerHTML = shopItems.map(item => `<div class="item-row shop-row"><span class="item-emoji" aria-hidden="true">${itemEmojis[item.id] || '🎁'}</span><span class="item-description"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.description)}</small></span><button class="small-button buy-button" type="button" data-buy="${escapeHtml(item.id)}" ${pet.coins < item.price ? 'disabled' : ''}>🪙 ${Number(item.price)}</button></div>`).join('');
 }
 
 function render() {
   const hasPet = Boolean(pet);
   document.querySelector('#pet-section').hidden = !hasPet;
   document.querySelector('#welcome-panel').hidden = hasPet;
-  if (!hasPet) {
-    renderShop();
-    return;
-  }
-
+  if (!hasPet) { renderShop(); return; }
   const mood = moodForPet();
   document.querySelector('#pet-name-display').textContent = pet.name;
   document.querySelector('#coin-count span').textContent = pet.coins;
   document.querySelector('#mood-badge').textContent = mood.badge;
   document.querySelector('#pet-mood-line').textContent = mood.line;
   document.querySelector('#pet-portrait').className = `pet-portrait ${mood.className}`;
-  setMeter('hunger', pet.hunger);
-  setMeter('happiness', pet.happiness);
-  setMeter('energy', pet.energy);
-  renderPetSwitcher();
-  renderInventory();
-  renderShop();
+  document.querySelector('#pet-avatar').textContent = animals[pet.species] || '🐾';
+  setMeter('hunger', pet.hunger); setMeter('happiness', pet.happiness); setMeter('energy', pet.energy);
+  renderPetSwitcher(); renderWardrobe(); renderInventory(); renderShop();
 }
 
-function rememberPet() {
-  if (pet) localStorage.setItem('digital-pet-selected-id', String(pet.id));
-}
-
+function rememberPet() { if (pet) localStorage.setItem('digital-pet-selected-id', String(pet.id)); }
 function updatePet(updatedPet) {
   pet = updatedPet;
   const index = pets.findIndex(candidate => candidate.id === pet.id);
-  if (index === -1) pets.push(pet);
-  else pets[index] = pet;
-  rememberPet();
-  render();
+  if (index < 0) pets.push(pet); else pets[index] = pet;
+  rememberPet(); render();
 }
 
-async function createPet(name) {
-  const createdPet = await request('/pets', {
-    method: 'POST',
-    body: JSON.stringify({ name }),
-  });
-  pets.push(createdPet);
-  updatePet(createdPet);
+function playEffect(action) {
+  const portrait = document.querySelector('#pet-portrait');
+  const layer = document.querySelector('#action-fx');
+  const effects = { feed: ['🍎', '✨', '😋', 'Yum!'], play: ['🧶', '💖', '✨', 'Whee!'], sleep: ['💤', '🌙', '⭐', 'Zzz…'], treat: ['🍪', '💖', '✨', 'Yummy!'], toy: ['🧶', '🎉', '💖', 'Play!'] };
+  const [first, second, third, caption] = effects[action] || effects.play;
+  portrait.classList.remove('animate-feed', 'animate-play', 'animate-sleep');
+  void portrait.offsetWidth;
+  portrait.classList.add(`animate-${action === 'feed' ? 'feed' : action === 'sleep' ? 'sleep' : 'play'}`);
+  layer.innerHTML = `<span class="pop pop-one">${first}</span><span class="pop pop-two">${second}</span><span class="pop pop-three">${third}</span><strong class="effect-caption">${caption}</strong>`;
+  window.clearTimeout(effectTimer);
+  effectTimer = window.setTimeout(() => { layer.innerHTML = ''; portrait.classList.remove('animate-feed', 'animate-play', 'animate-sleep'); }, 1500);
+}
+
+async function createPet(name, species) {
+  const created = await request('/pets', { method: 'POST', body: JSON.stringify({ name, species }) });
+  pets.push(created); updatePet(created);
   document.querySelector('#pet-name').value = '';
-  showMessage(`${createdPet.name} is excited to meet you!`);
+  showMessage(`${created.name} is excited to meet you!`); playEffect('play');
 }
-
 async function doAction(action) {
   updatePet(await request(`/pets/${pet.id}/actions/${action}`, { method: 'POST' }));
-  const messages = {
-    feed: 'Yum! Your pet enjoyed the meal.',
-    play: 'That was fun! Your pet had a lovely playtime.',
-    sleep: 'Sweet dreams! Your pet feels rested.',
-  };
-  showMessage(messages[action]);
+  const messages = { feed: 'Yum! Your pet enjoyed the meal.', play: 'That was fun! Your pet had a lovely playtime.', sleep: 'Sweet dreams! Your pet feels rested.' };
+  showMessage(messages[action]); playEffect(action);
 }
-
 async function useItem(itemId) {
   updatePet(await request(`/pets/${pet.id}/inventory/${encodeURIComponent(itemId)}/use`, { method: 'POST' }));
-  showMessage(`${itemNames[itemId] || 'Item'} used. Your pet appreciates it!`);
+  showMessage(`${itemNames[itemId] || 'Item'} used. Your pet appreciates it!`); playEffect(itemId === 'food' ? 'feed' : itemId === 'treat' ? 'treat' : 'toy');
 }
-
 async function buyItem(itemId) {
   updatePet(await request(`/pets/${pet.id}/inventory/${encodeURIComponent(itemId)}/purchase`, { method: 'POST' }));
   showMessage(`${itemNames[itemId] || 'Item'} added to your inventory.`);
 }
-
+async function setAccessory(accessoryId) {
+  updatePet(await request(`/pets/${pet.id}/accessory`, { method: 'PUT', body: JSON.stringify({ accessoryId }) }));
+  const outfit = accessories.find(item => item.id === accessoryId);
+  showMessage(accessoryId === 'none' ? 'Your pet is ready for a fresh look!' : `${pet.name} looks adorable in the ${outfit.name.toLowerCase()}!`);
+  playEffect('play');
+}
 async function perform(action) {
   if (busy) return;
   busy = true;
   document.querySelectorAll('button').forEach(button => { button.disabled = true; });
-  try { await action(); }
-  catch (error) { showMessage(error.message, true); }
-  finally {
-    busy = false;
-    render();
-  }
+  try { await action(); } catch (error) { showMessage(error.message, true); }
+  finally { busy = false; render(); }
 }
 
 document.querySelector('#pet-form').addEventListener('submit', event => {
   event.preventDefault();
   const name = document.querySelector('#pet-name').value.trim();
   if (!name) return;
-  perform(() => createPet(name));
+  perform(() => createPet(name, document.querySelector('#pet-species').value));
 });
-
-document.querySelector('.actions').addEventListener('click', event => {
-  const button = event.target.closest('[data-action]');
-  if (button) perform(() => doAction(button.dataset.action));
-});
-
-document.querySelector('#inventory-list').addEventListener('click', event => {
-  const button = event.target.closest('[data-use]');
-  if (button) perform(() => useItem(button.dataset.use));
-});
-
-document.querySelector('#shop-list').addEventListener('click', event => {
-  const button = event.target.closest('[data-buy]');
-  if (button && !button.disabled) perform(() => buyItem(button.dataset.buy));
-});
-
+document.querySelector('.actions').addEventListener('click', event => { const button = event.target.closest('[data-action]'); if (button) perform(() => doAction(button.dataset.action)); });
+document.querySelector('#inventory-list').addEventListener('click', event => { const button = event.target.closest('[data-use]'); if (button) perform(() => useItem(button.dataset.use)); });
+document.querySelector('#shop-list').addEventListener('click', event => { const button = event.target.closest('[data-buy]'); if (button && !button.disabled) perform(() => buyItem(button.dataset.buy)); });
+document.querySelector('#wardrobe-list').addEventListener('click', event => { const button = event.target.closest('[data-accessory]'); if (button) perform(() => setAccessory(button.dataset.accessory)); });
 document.querySelector('#pet-switcher').addEventListener('click', event => {
   const button = event.target.closest('[data-pet-id]');
   if (!button) return;
   pet = pets.find(candidate => candidate.id === Number(button.dataset.petId)) || pet;
-  rememberPet();
-  render();
+  rememberPet(); render();
 });
 
 async function start() {
   try {
     const [loadedPets, loadedItems] = await Promise.all([request('/pets'), request('/items')]);
-    pets = loadedPets;
-    shopItems = loadedItems;
+    pets = loadedPets; shopItems = loadedItems;
     const savedId = Number(localStorage.getItem('digital-pet-selected-id'));
     pet = pets.find(candidate => candidate.id === savedId) || pets[0] || null;
-    rememberPet();
-    render();
-  } catch (error) {
-    render();
-    showMessage(`Couldn't connect to the pet garden: ${error.message}`, true);
-  }
+    rememberPet(); render();
+  } catch (error) { render(); showMessage(`Couldn't connect to the pet garden: ${error.message}`, true); }
 }
-
 start();
