@@ -1,6 +1,6 @@
 # Digital Pet
 
-A small full-stack digital pet starter project with a Java 17 / Spring Boot REST API and a vanilla JavaScript / Vite frontend.
+A small full-stack digital pet starter project with a C# / ASP.NET Core REST API and a vanilla JavaScript / Vite frontend.
 
 ## Features
 
@@ -9,24 +9,22 @@ A small full-stack digital pet starter project with a Java 17 / Spring Boot REST
 - Feed, play with, and put your pet to sleep
 - Manage pet inventory and use food, treats, and toys
 - Buy items from a small shop with coins
-- In-memory storage for easy local development (data resets when the backend restarts)
+- In-memory storage for local development (data resets when the backend restarts)
 
 ## Requirements
 
-- Java 17+
-- Maven 3.8+
+- .NET 8 SDK
 - Node.js 18+
 
 ## Run locally
 
-Start the backend:
+Start the C# backend in one terminal:
 
 ```bash
-cd backend
-mvn spring-boot:run
+dotnet run --project backend-csharp
 ```
 
-In another terminal, start the frontend:
+Start the JavaScript frontend in a second terminal:
 
 ```bash
 cd frontend
@@ -34,7 +32,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL shown in the terminal (usually http://localhost:5173). Vite proxies `/api` requests to the backend at http://localhost:8080.
+Open the Vite URL shown in the terminal (usually http://localhost:5173). Vite proxies `/api` requests to the ASP.NET Core API at http://localhost:8080.
 
 ## API overview
 
@@ -48,4 +46,4 @@ Open the Vite URL shown in the terminal (usually http://localhost:5173). Vite pr
 - `POST /api/pets/{id}/inventory/{itemId}/use` — use an inventory item
 - `POST /api/pets/{id}/inventory/{itemId}/purchase` — buy an item
 
-Pet stats are between 0 and 100. Hunger increases when a pet sleeps; lower hunger is better. Inventory and pets are currently kept in memory, so a database can be added later.
+Pet stats range from 0 to 100. Hunger increases when a pet sleeps; lower hunger is better. Inventory and pets are currently kept in memory, so a database can be added later.
