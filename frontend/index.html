@@ -13,52 +13,28 @@
   </head>
   <body>
     <main class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="#" aria-label="Little Tails home"><span class="brand-mark" aria-hidden="true"></span> little tails</a>
-        <span class="top-note">A tiny world for your new best friend</span>
-      </header>
-
-      <section class="intro">
-        <p class="eyebrow">A LITTLE LOVE GOES A LONG WAY</p>
-        <h1>Make room for <em>happy paws.</em></h1>
-        <p class="intro-copy">Pick your pal, give them a name, and start making memories.</p>
-      </section>
-
+      <header class="topbar"><a class="brand" href="#" aria-label="Little Tails home"><span class="brand-mark" aria-hidden="true"></span> little tails</a><span class="top-note">A tiny world for your new best friend</span></header>
+      <section class="intro"><p class="eyebrow">A LITTLE LOVE GOES A LONG WAY</p><h1>Make room for <em>happy paws.</em></h1><p class="intro-copy">Pick your pal, give them a name, and start making memories.</p></section>
       <section class="create-panel" aria-labelledby="create-title">
         <div class="create-icon" aria-hidden="true"><span class="paw-mark"></span></div>
         <div class="create-copy"><h2 id="create-title">Meet a new friend</h2><p>Choose a little pal and give them a name.</p></div>
         <form id="pet-form" class="create-form">
           <label class="visually-hidden" for="pet-species">Choose your animal</label>
-          <select id="pet-species" name="species" aria-label="Choose an animal">
-            <option value="cat">Cat</option><option value="dog">Dog</option><option value="bunny">Bunny</option><option value="bear">Bear</option><option value="fox">Fox</option><option value="penguin">Penguin</option><option value="frog">Frog</option><option value="panda">Panda</option><option value="turtle">Turtle</option><option value="unicorn">Unicorn</option>
-          </select>
-          <label class="visually-hidden" for="pet-name">Pet name</label>
-          <input id="pet-name" name="name" maxlength="30" placeholder="Name your pet..." required />
+          <select id="pet-species" name="species" aria-label="Choose an animal"><option value="cat">Cat</option><option value="dog">Dog</option><option value="bunny">Bunny</option><option value="bear">Bear</option><option value="fox">Fox</option><option value="penguin">Penguin</option><option value="frog">Frog</option><option value="panda">Panda</option><option value="turtle">Turtle</option><option value="unicorn">Unicorn</option></select>
+          <label class="visually-hidden" for="pet-name">Pet name</label><input id="pet-name" name="name" maxlength="30" placeholder="Name your pet..." required />
           <button class="button button-primary" type="submit">Adopt pal <span aria-hidden="true">↗</span></button>
         </form>
       </section>
-
-      <section id="welcome-panel" class="welcome-panel">
-        <span class="welcome-star star-one" aria-hidden="true">✦</span><span class="welcome-star star-two" aria-hidden="true">✧</span>
-        <p class="eyebrow">YOUR STORY STARTS HERE</p><h2>A little friend is waiting.</h2>
-        <p>Choose from ten adorable animals and make one your new best friend.</p>
-      </section>
-
+      <section id="welcome-panel" class="welcome-panel"><span class="welcome-star star-one" aria-hidden="true">✦</span><span class="welcome-star star-two" aria-hidden="true">✧</span><p class="eyebrow">YOUR STORY STARTS HERE</p><h2>A little friend is waiting.</h2><p>Choose from ten adorable animals and make one your new best friend.</p></section>
       <section id="pet-section" class="pet-section" hidden>
         <div class="section-heading"><div><p class="eyebrow">YOUR LITTLE FRIENDS</p><h2>Pet care</h2></div><span id="coin-count" class="coin-pill" aria-label="Pet coins"><span class="coin-dot" aria-hidden="true"></span><span>0</span> coins</span></div>
         <nav id="pet-switcher" class="pet-switcher" aria-label="Choose a pet" hidden></nav>
-
         <article class="pet-card">
           <div id="pet-portrait" class="pet-portrait" aria-label="Animated pet scene">
-            <span class="portrait-cloud cloud-one" aria-hidden="true"></span><span class="portrait-cloud cloud-two" aria-hidden="true"></span>
-            <span class="portrait-sparkle sparkle-one" aria-hidden="true">✦</span><span class="portrait-sparkle sparkle-two" aria-hidden="true">✧</span>
-            <div class="pet-stage" id="pet-stage">
-              <div id="pet-character" class="pet-character" role="img" aria-label="Your pet"></div>
-              <div id="action-fx" class="action-fx" aria-hidden="true"></div>
-            </div>
+            <span class="portrait-cloud cloud-one" aria-hidden="true"></span><span class="portrait-cloud cloud-two" aria-hidden="true"></span><span class="portrait-sparkle sparkle-one" aria-hidden="true">✦</span><span class="portrait-sparkle sparkle-two" aria-hidden="true">✧</span>
+            <div class="pet-stage" id="pet-stage"><div id="pet-character" class="pet-character" role="img" aria-label="Your pet"></div><div id="action-fx" class="action-fx" aria-hidden="true"></div></div>
             <span class="portrait-shadow" aria-hidden="true"></span><span class="grass grass-left" aria-hidden="true"></span><span class="grass grass-right" aria-hidden="true"></span>
           </div>
-
           <div class="pet-details">
             <div class="pet-title"><div><p class="eyebrow">BEST FRIEND</p><h3 id="pet-name-display"></h3></div><span id="mood-badge" class="mood-badge">your buddy</span></div>
             <p id="pet-mood-line" class="pet-mood-line">Your little friend is happy to see you.</p>
@@ -71,14 +47,12 @@
             <section class="wardrobe" aria-labelledby="wardrobe-title"><div class="wardrobe-heading"><div><p class="eyebrow">DRESS-UP TIME</p><h4 id="wardrobe-title">Pick an accessory</h4></div><span class="wardrobe-star" aria-hidden="true">✦</span></div><div id="wardrobe-list" class="wardrobe-list" role="group" aria-label="Choose an accessory"></div></section>
           </div>
         </article>
-
         <div class="lower-grid">
           <section class="content-card" aria-labelledby="inventory-title"><div class="card-heading"><div><p class="eyebrow">READY WHEN YOU ARE</p><h3 id="inventory-title">Pet inventory</h3></div><span class="heading-icon inventory-icon" aria-hidden="true"></span></div><div id="inventory-list" class="inventory-list"></div></section>
           <section class="content-card shop-card" aria-labelledby="shop-title"><div class="card-heading"><div><p class="eyebrow">A LITTLE SOMETHING</p><h3 id="shop-title">Pet shop</h3></div><span class="heading-icon shop-icon" aria-hidden="true"></span></div><div id="shop-list" class="shop-list"></div></section>
         </div>
       </section>
-      <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
-      <footer>Made with care <span aria-hidden="true">♡</span></footer>
+      <p id="status-message" class="status-message" role="status" aria-live="polite"></p><footer>Made with care <span aria-hidden="true">♡</span></footer>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>
