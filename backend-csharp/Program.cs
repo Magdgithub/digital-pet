@@ -54,7 +54,7 @@ public sealed class PetStore
     private static readonly HashSet<string> Species = new(StringComparer.OrdinalIgnoreCase)
         { "cat", "dog", "bunny", "bear", "fox", "penguin", "frog", "panda", "turtle", "unicorn" };
     private static readonly HashSet<string> Accessories = new(StringComparer.OrdinalIgnoreCase)
-        { "none", "tiara", "headband", "bow", "crown", "flower" };
+        { "none", "tiara", "bow", "scarf" };
     private readonly ConcurrentDictionary<long, Pet> pets = new();
     private long nextId;
     private readonly Dictionary<string, ItemInfo> catalog = new()

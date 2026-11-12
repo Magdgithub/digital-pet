@@ -3,12 +3,10 @@ const itemEmojis = { food: '🍎', treat: '🍪', toy: '🧶' };
 const itemNames = { food: 'Pet food', treat: 'Treat', toy: 'Toy' };
 const animals = { cat: '🐱', dog: '🐶', bunny: '🐰', bear: '🐻', fox: '🦊', penguin: '🐧', frog: '🐸', panda: '🐼', turtle: '🐢', unicorn: '🦄' };
 const accessories = [
-  { id: 'none', name: 'No outfit', icon: '✨' },
+  { id: 'none', name: 'No accessory', icon: '✨' },
   { id: 'tiara', name: 'Tiara', icon: '👑' },
-  { id: 'headband', name: 'Headband', icon: '🎀' },
-  { id: 'bow', name: 'Bow', icon: '🎗️' },
-  { id: 'crown', name: 'Crown', icon: '♛' },
-  { id: 'flower', name: 'Flower', icon: '🌼' },
+  { id: 'bow', name: 'Bow', icon: '🎀' },
+  { id: 'scarf', name: 'Scarf', icon: '🧣' },
 ];
 let pets = [];
 let pet = null;
@@ -64,7 +62,9 @@ function renderWardrobe() {
   const list = document.querySelector('#wardrobe-list');
   list.innerHTML = accessories.map(item => `<button type="button" class="wardrobe-item ${pet.accessory === item.id ? 'selected' : ''}" data-accessory="${item.id}" aria-pressed="${pet.accessory === item.id}" title="${item.name}"><span aria-hidden="true">${item.icon}</span><small>${item.name}</small></button>`).join('');
   const selected = accessories.find(item => item.id === pet.accessory);
-  document.querySelector('#pet-accessory').textContent = pet.accessory === 'none' ? '' : selected?.icon || '';
+  const display = document.querySelector('#pet-accessory');
+  display.textContent = pet.accessory === 'none' ? '' : selected?.icon || '';
+  display.className = `pet-accessory ${pet.accessory === 'scarf' ? 'accessory-scarf' : ''}`;
 }
 
 function renderInventory() {
@@ -107,30 +107,45 @@ function updatePet(updatedPet) {
 function playEffect(action) {
   const portrait = document.querySelector('#pet-portrait');
   const layer = document.querySelector('#action-fx');
-  const effects = { feed: ['🍎', '✨', '😋', 'Yum!'], play: ['🧶', '💖', '✨', 'Whee!'], sleep: ['💤', '🌙', '⭐', 'Zzz…'], treat: ['🍪', '💖', '✨', 'Yummy!'], toy: ['🧶', '🎉', '💖', 'Play!'] };
-  const [first, second, third, caption] = effects[action] || effects.play;
+  const effects = {
+    feed: { icons: ['🍎', '✨', '😋'], caption: 'Nom nom!', className: 'animate-feed', duration: 1900 },
+    play: { icons: ['🧶', '💖', '✨'], caption: 'Wheee!', className: 'animate-play', duration: 2600 },
+    sleep: { icons: ['💤', '🌙', '⭐'], caption: 'Sweet dreams…', className: 'animate-sleep', duration: 5000 },
+    treat: { icons: ['🍪', '💖', '✨'], caption: 'Yummy!', className: 'animate-feed', duration: 1900 },
+    toy: { icons: ['🧶', '🎉', '💖'], caption: 'Wheee!', className: 'animate-play', duration: 2600 },
+  };
+  const effect = effects[action] || effects.play;
   portrait.classList.remove('animate-feed', 'animate-play', 'animate-sleep');
   void portrait.offsetWidth;
-  portrait.classList.add(`animate-${action === 'feed' ? 'feed' : action === 'sleep' ? 'sleep' : 'play'}`);
-  layer.innerHTML = `<span class="pop pop-one">${first}</span><span class="pop pop-two">${second}</span><span class="pop pop-three">${third}</span><strong class="effect-caption">${caption}</strong>`;
+  portrait.classList.add(effect.className);
+  layer.innerHTML = `<span class="pop pop-one">${effect.icons[0]}</span><span class="pop pop-two">${effect.icons[1]}</span><span class="pop pop-three">${effect.icons[2]}</span><strong class="effect-caption">${effect.caption}</strong>`;
   window.clearTimeout(effectTimer);
-  effectTimer = window.setTimeout(() => { layer.innerHTML = ''; portrait.classList.remove('animate-feed', 'animate-play', 'animate-sleep'); }, 1500);
+  return new Promise(resolve => {
+    effectTimer = window.setTimeout(() => {
+      layer.innerHTML = '';
+      portrait.classList.remove(effect.className);
+      resolve();
+    }, effect.duration);
+  });
 }
 
 async function createPet(name, species) {
   const created = await request('/pets', { method: 'POST', body: JSON.stringify({ name, species }) });
   pets.push(created); updatePet(created);
   document.querySelector('#pet-name').value = '';
-  showMessage(`${created.name} is excited to meet you!`); playEffect('play');
+  showMessage(`${created.name} is excited to meet you!`);
+  await playEffect('play');
 }
 async function doAction(action) {
   updatePet(await request(`/pets/${pet.id}/actions/${action}`, { method: 'POST' }));
-  const messages = { feed: 'Yum! Your pet enjoyed the meal.', play: 'That was fun! Your pet had a lovely playtime.', sleep: 'Sweet dreams! Your pet feels rested.' };
-  showMessage(messages[action]); playEffect(action);
+  const messages = { feed: 'Yum! Your pet enjoyed the apple.', play: 'Your pet is chasing its toy!', sleep: 'Your pet is settling in for a nap…' };
+  showMessage(messages[action]);
+  await playEffect(action);
 }
 async function useItem(itemId) {
   updatePet(await request(`/pets/${pet.id}/inventory/${encodeURIComponent(itemId)}/use`, { method: 'POST' }));
-  showMessage(`${itemNames[itemId] || 'Item'} used. Your pet appreciates it!`); playEffect(itemId === 'food' ? 'feed' : itemId === 'treat' ? 'treat' : 'toy');
+  showMessage(`${itemNames[itemId] || 'Item'} used. Your pet appreciates it!`);
+  await playEffect(itemId === 'food' ? 'feed' : itemId === 'treat' ? 'treat' : 'toy');
 }
 async function buyItem(itemId) {
   updatePet(await request(`/pets/${pet.id}/inventory/${encodeURIComponent(itemId)}/purchase`, { method: 'POST' }));
@@ -140,7 +155,7 @@ async function setAccessory(accessoryId) {
   updatePet(await request(`/pets/${pet.id}/accessory`, { method: 'PUT', body: JSON.stringify({ accessoryId }) }));
   const outfit = accessories.find(item => item.id === accessoryId);
   showMessage(accessoryId === 'none' ? 'Your pet is ready for a fresh look!' : `${pet.name} looks adorable in the ${outfit.name.toLowerCase()}!`);
-  playEffect('play');
+  await playEffect('play');
 }
 async function perform(action) {
   if (busy) return;
