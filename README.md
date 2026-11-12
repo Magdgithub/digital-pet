@@ -1,30 +1,31 @@
 # Digital Pet
 
-A small full-stack digital pet starter project with a C# / ASP.NET Core REST API and a vanilla JavaScript / Vite frontend.
+A cozy little digital pet starter project with a C# / ASP.NET Core REST API and a vanilla JavaScript / Vite frontend.
 
 ## Features
 
-- Create a named pet
-- View hunger, happiness, energy, and coins
-- Feed, play with, and put your pet to sleep
-- Manage pet inventory and use food, treats, and toys
-- Buy items from a small shop with coins
-- In-memory storage for local development (data resets when the backend restarts)
+- Create multiple named pets and switch between them
+- Keep an eye on hunger, happiness, energy, and coins
+- Feed, play with, and let your pet sleep
+- Use food, treats, and toys from inventory
+- Buy supplies from the pet shop
+- Animated, responsive pet-care interface
+- In-memory backend storage for local development (data resets when the backend restarts)
 
 ## Requirements
 
 - .NET 8 SDK
-- Node.js 18+
+- Node.js 16 or newer (Vite 4 is used for compatibility)
 
 ## Run locally
 
-Start the C# backend in one terminal:
+Start the backend in one terminal:
 
 ```bash
-dotnet run --project backend-csharp
+dotnet run --project backend-csharp -- --urls http://localhost:8080
 ```
 
-Start the JavaScript frontend in a second terminal:
+Start the frontend in a second terminal:
 
 ```bash
 cd frontend
@@ -32,7 +33,7 @@ npm install
 npm run dev
 ```
 
-Open the Vite URL shown in the terminal (usually http://localhost:5173). Vite proxies `/api` requests to the ASP.NET Core API at http://localhost:8080.
+Open the Vite URL shown in the terminal, usually http://localhost:5173. Vite proxies `/api` requests to the ASP.NET Core API at http://localhost:8080.
 
 ## API overview
 
@@ -46,4 +47,4 @@ Open the Vite URL shown in the terminal (usually http://localhost:5173). Vite pr
 - `POST /api/pets/{id}/inventory/{itemId}/use` — use an inventory item
 - `POST /api/pets/{id}/inventory/{itemId}/purchase` — buy an item
 
-Pet stats range from 0 to 100. Hunger increases when a pet sleeps; lower hunger is better. Inventory and pets are currently kept in memory, so a database can be added later.
+Pet stats range from 0 to 100. Hunger increases when a pet sleeps; lower hunger is better. Pet and inventory data are currently stored in memory, so a database can be added later.
